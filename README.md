@@ -1,25 +1,39 @@
-# Custom Physics Engine for Unity
+# Modular Behavior Tree System
 
-A lightweight, component-based physics engine built from scratch in C# to bypass Unity's built-in PhysX. This project demonstrates custom integration, collision detection, and resolution logic designed for high-performance or specialized 2D/3D interactions.
+A high-performance, node-based Behavior Tree (BT) framework designed for modular AI logic in Unity. This system allows for complex NPC decision-making through a clean, extensible C# architecture.
 
-## 🚀 Features
-* **Custom Integrator:** Implementation of Verlet and Euler integration for predictable motion.
-* **Collision Detection:** Support for AABB (Axis-Aligned Bounding Box), Sphere-to-Sphere, and Raycast intersections.
-* **Material Properties:** Adjustable friction, restitution (bounciness), and mass constants per object.
-* **Non-Kinematic Solver:** Operates independently of Unity’s standard Physics loop for total control over the simulation.
+## 🧠 Core Architecture
+The system utilizes a base `Node` class with three primary states:
+* `SUCCESS`: The node completed its task.
+* `FAILURE`: The node failed or conditions were not met.
+* `RUNNING`: The node is still executing (e.g., a "MoveTo" action).
 
-## 🛠️ Technical Implementation
-The engine calculates forces using:
-* **F = ma** for acceleration derivation.
-* Impulse-based collision resolution to handle energy transfer between bodies.
-* Spatial partitioning (Grid-based) to optimize collision checks.
+## 🧩 Included Nodes
+* **Composites:** Sequence (AND logic), Selector (OR/Priority logic).
+* **Decorators:** Inverter, Repeater, Succeeder.
+* **Leaf Nodes:** Basic actions like Wait, MoveTo, and DebugLog.
 
-## 📂 Project Structure
-* `/Core`: The main physics solver and integration logic.
-* `/Colliders`: Geometric collision primitives and intersection math.
-* `/Utils`: Vector math extensions and gravity constants.
+## ➕ Adding Your Own Node
+The system is designed for easy expansion. To create a custom Action or Decorator:
 
-## 🎮 Getting Started
-1. Clone the repository into your Unity `Assets` folder.
-2. Attach the `CustomPhysicsBody` component to any GameObject.
-3. Use the `PhysicsWorld` manager to globalize gravity and simulation steps.
+1. **Inherit from the Node class:** Create a new C# script and inherit from `BTNode`.
+2. **Override the Evaluate method:** This is where your custom AI logic lives.
+3. **Return a State:** You must return a `NodeState` so the parent knows how to proceed.
+
+### Example Code:
+```csharp
+public class MyCustomAction : BTNode
+{
+    public override NodeState Evaluate()
+    {
+        // Your Logic (e.g., Check health or distance)
+        if (targetInRange)
+        {
+            _state = NodeState.SUCCESS;
+            return _state;
+        }
+        
+        _state = NodeState.RUNNING;
+        return _state;
+    }
+}
